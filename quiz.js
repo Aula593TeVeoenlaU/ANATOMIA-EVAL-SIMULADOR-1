@@ -17,10 +17,10 @@ const questions = [
         block: 'ANATOMÍA', 
         text: '¿Cuál es la posición anatómica correcta?', 
         options: [
-            'a) Estar de pie, mirando hacia adelante, brazos extendidos a los lados con palmas hacia adelante', 
-            'b) De pie, con los brazos extendidos hacia delante y las palmas hacia atrás', 
-            'c) Cuerpo de lado, brazos separados cruzados y pies separados', 
-            'd) Cuerpo de frente, brazos extendidos y pies cruzados'
+            'a) Estar de pie, mirando hacia adelante, con la cabeza erguida y los pies juntos. Los brazos deben estar extendidos a los lados del cuerpo con las palmas de las manos hacia adelante.', 
+            'b) Cuerpo de lado, brazos separados cruzados y pies separados.', 
+            'c) Cuerpo de frente, brazos extendidos y pies cruzados.', 
+            'd) De pie, con los brazos extendidos hacia delante y las palmas hacia atrás.'
         ], 
         answer: 'a' 
     },
@@ -539,3 +539,4 @@ window.addEventListener("pagehide", () => {
         saveProgress();
     }
 });
+
