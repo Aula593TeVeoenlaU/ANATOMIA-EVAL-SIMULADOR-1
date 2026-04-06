@@ -7,20 +7,20 @@
 const questions = [
     { 
         id: 1, 
-        block: 'ANATOMÍA', 
+        block: 'ANATOMÍA GENERAL', 
         text: '¿Los huesos de acuerdo a su composición se clasifican en?', 
         options: ['a) Alargado, sesamoideo', 'b) Plano, irregular', 'c) Esponjosos y compactos', 'd) Irregulares, regulares'], 
         answer: 'c' 
     },
     { 
         id: 2, 
-        block: 'ANATOMÍA', 
+        block: 'ANATOMÍA GENERAL', 
         text: '¿Cuál es la posición anatómica correcta?', 
         options: [
             'a) Estar de pie, mirando hacia adelante, con la cabeza erguida y los pies juntos. Los brazos deben estar extendidos a los lados del cuerpo con las palmas de las manos hacia adelante.', 
             'b) Cuerpo de lado, brazos separados cruzados y pies separados.', 
             'c) Cuerpo de frente, brazos extendidos y pies cruzados.', 
-            'd) De pie, con los brazos extendidos hacia delante y las palmas hacia atrás.'
+            'd) Estar de pie, con los brazos extendidos hacia delante y las palmas hacia atrás.'
         ], 
         answer: 'a' 
     },
@@ -35,14 +35,14 @@ const questions = [
         id: 4, 
         block: 'SISTEMA MUSCULAR', 
         text: '¿Qué tipo de músculo se encuentra en el corazón?', 
-        options: ['a) Músculo liso', 'b) Musculo involuntario simple', 'c) Músculo estriado esquelético', 'd) Músculo estriado cardíaco'], 
+        options: ['a) Músculo liso', 'b) Musculo involuntario', 'c) Músculo estriado esquelético', 'd) Músculo estriado cardíaco'], 
         answer: 'd' 
     }, 
     { 
         id: 5, 
         block: 'SISTEMA RESPIRATORIO', 
         text: '¿Cuál es la función principal del sistema respiratorio en el cuerpo humano?', 
-        options: ['a) Regular la temperatura corporal', 'b) Intercambiar gases, como oxígeno y dióxido de carbono', 'c) Producir hormonas para el crecimiento', 'd) Filtrar la sangre para eliminar toxinas'], 
+        options: ['a) Regular la temperatura corporal', 'b) Intercambiar gases, como oxígeno y dióxido de carbono, entre el cuerpo y el ambiente', 'c) Producir hormonas para el crecimiento', 'd) Filtrar la sangre para eliminar toxinas'], 
         answer: 'b' 
     }, 
     { 
@@ -55,9 +55,9 @@ const questions = [
     { 
         id: 7, 
         block: 'SISTEMA EXCRETOR', 
-        text: '¿Cuál es el nombre del proceso por el cual los riñones eliminan los desechos y exceso de líquidos del cuerpo (formación de orina)?', 
-        options: ['a) Filtración', 'b) Reabsorción', 'c) Secreción', 'd) Excreción general'], 
-        answer: 'a' 
+        text: '¿Cuál es el nombre del proceso por el cual los riñones eliminan los desechos y exceso de líquidos del cuerpo?', 
+        options: ['a) Filtración', 'b) Reabsorción', 'c) Secreción', 'd) Excreción'], 
+        answer: 'd' 
     }, 
     { 
         id: 8, 
@@ -77,27 +77,27 @@ const questions = [
         id: 10, 
         block: 'SISTEMA ENDOCRINO', 
         text: '¿Qué hormona produce la glándula tiroides?', 
-        options: ['a) Insulina', 'b) Adrenalina', 'c) Tiroxina (T4) y triyodotironina (T3)', 'd) Cortisol'], 
+        options: ['a) Insulina', 'b) Adrenalina', 'c) Tiroxina', 'd) Cortisol'], 
         answer: 'c' 
     }, 
     { 
         id: 11, 
         block: 'SISTEMA ENDOCRINO', 
         text: '¿Cuál es la función del sistema endocrino?', 
-        options: ['a) Producir hormonas que regulan diversas funciones corporales', 'b) Regular la temperatura corporal mecánicamente', 'c) Controlar los movimientos del cuerpo', 'd) Procesar información sensorial'], 
+        options: ['a) Producir hormonas que regulan diversas funciones corporales', 'b) Regular la temperatura corporal', 'c) Controlar los movimientos del cuerpo', 'd) Procesar información sensorial'], 
         answer: 'a' 
     }, 
     { 
         id: 12, 
         block: 'HOMEOSTASIS', 
         text: '¿Qué es la homeostasis?', 
-        options: ['a) La capacidad del cuerpo para mantener un entorno interno estable', 'b) La capacidad del cuerpo para adaptarse a cambios sin regulación', 'c) La capacidad del cuerpo para regular solo la temperatura', 'd) La capacidad del cuerpo para eliminar desechos metabólicos únicamente'], 
+        options: ['a) La capacidad del cuerpo para mantener un entorno interno estable', 'b) La capacidad del cuerpo para adaptarse a cambios sin regulación', 'c) La capacidad del cuerpo para regular solo la temperatura corporal', 'd) La capacidad del cuerpo para eliminar desechos metabólicos'], 
         answer: 'a' 
     }, 
     { 
         id: 13, 
         block: 'CASO CLÍNICO', 
-        text: 'Niño de 12 años presenta dolor abdominal intenso en fosa iliaca derecha, fiebre y vómito. ¿Qué diagnóstico es el más probable?', 
+        text: 'Niño de 12 años acude con su tutor legal por presentar dolor abdominal hace aproximadamente 4 horas. Además, refiere fiebre y vómito. Al ser examinado se evidencia dolor de gran intensidad en fosa iliaca derecha (cuadrante inferior derecho). <p>¿Qué diagnóstico tiene?', 
         options: ['a) Cólico Biliar', 'b) Torsión ovárica', 'c) Apendicitis', 'd) Pancreatitis'], 
         answer: 'c' 
     }, 
@@ -105,7 +105,7 @@ const questions = [
         id: 14, 
         block: 'CASO CLÍNICO', 
         text: 'Paciente de 45 años con polidipsia, poliuria, pérdida de peso y glucosa en sangre de 250 mg/dL. ¿Cuál es la causa más probable?', 
-        options: ['a) Insuficiencia renal', 'b) Hipertensión arterial', 'c) Diabetes Mellitus', 'd) Enfermedad de la tiroides'], 
+        options: ['a) Insuficiencia renal', 'b) Hipertensión arterial', 'c) Diabetes mellitus', 'd) Enfermedad de la tiroides'], 
         answer: 'c' 
     }, 
     { 
@@ -136,13 +136,13 @@ const questions = [
         options: ['a) Tejido conectivo', 'b) Tejido epitelial', 'c) Tejido muscular', 'd) Tejido nervioso'], 
         answer: 'c' 
     }, // [cite: 141, 142, 143, 144, 145, 147]
-    { 
+    {
         id: 19, 
-        block: 'BIOLOGÍA CELULAR', 
-        text: '¿Cuál es el tipo de célula que se caracteriza por ser la unidad básica de la vida y tener una membrana celular que la rodea y núcleo definido?', 
-        options: ['a) Célula procariota', 'b) Célula eucariota', 'c) Célula vegetal', 'd) Célula animal simple'], 
-        answer: 'b' 
-    }, // [cite: 148, 149, 150, 151, 152, 154]
+	block: 'BIOLOGÍA CELULAR', 
+    	text: '¿A qué tipo de organización celular pertenecen las unidades estructurales y funcionales de los seres humanos?', 
+    	options: ['a) Célula procariota', 'b) Célula eucariota', 'c) Célula bacteriana', 'd) Célula arquea'], 
+    	answer: 'b' 
+    },
     { 
         id: 20, 
         block: 'HISTOLOGÍA', 
@@ -155,7 +155,7 @@ const questions = [
 // Variables globales
 let currentQuestionIndex = 0;
 let timerInterval;
-const totalTime = 20 * 60; // 20 minutos
+const totalTime = 24 * 60; // 24 minutos
 let timeRemaining = totalTime;
 let userAnswers = {};
 let flaggedQuestions = new Set();
