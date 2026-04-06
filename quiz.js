@@ -1,9 +1,12 @@
 // ==========================
-// SIMULADOR DE INGRESO - ANATOMÍA (ACTUALIZADO)
+// SIMULADOR DE INGRESO - ANATOMÍA
 // ==========================
 
-// ===== PREGUNTAS DE ANATOMÍA (NUEVO CUESTIONARIO) =====
-// Extraídas del Cuestionario Final proporcionado
+// ===== CONFIGURACIÓN FORMSubmit =====
+const FORM_SUBMIT_EMAIL = "sebastianneto84@gmail.com";
+const FORM_SUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${FORM_SUBMIT_EMAIL}`;
+
+// ===== PREGUNTAS DE ANATOMÍA =====
 const questions = [
     { 
         id: 1, 
@@ -114,34 +117,34 @@ const questions = [
         text: '¿Cuál es el tipo de tejido animal que se caracteriza por tener una función de almacenamiento de energía y nutrientes?', 
         options: ['a) Tejido conectivo', 'b) Tejido adiposo', 'c) Tejido muscular', 'd) Tejido nervioso'], 
         answer: 'b' 
-    }, // [cite: 120, 121, 122, 123, 124, 126]
+    },
     { 
         id: 16, 
         block: 'HISTOLOGÍA', 
         text: '¿Cuál es el tipo de tejido animal que se caracteriza por tener una función de protección y defensa contra lesiones e infecciones?', 
         options: ['a) Tejido conectivo', 'b) Tejido epitelial', 'c) Tejido muscular', 'd) Tejido nervioso'], 
         answer: 'b' 
-    }, // [cite: 127, 128, 129, 130, 131, 133]
+    },
     { 
         id: 17, 
         block: 'NIVELES DE ORGANIZACIÓN', 
         text: '¿Cuál es el tipo de estructura que se caracteriza por ser un conjunto de células que trabajan juntas para realizar una función específica?', 
         options: ['a) Tejido', 'b) Órgano', 'c) Sistema', 'd) Organismo'], 
         answer: 'a' 
-    }, // [cite: 134, 135, 136, 137, 138, 140]
+    },
     { 
         id: 18, 
         block: 'HISTOLOGÍA', 
         text: '¿Cuál es el tipo de tejido animal que se caracteriza por tener células especializadas para la contracción y el movimiento?', 
         options: ['a) Tejido conectivo', 'b) Tejido epitelial', 'c) Tejido muscular', 'd) Tejido nervioso'], 
         answer: 'c' 
-    }, // [cite: 141, 142, 143, 144, 145, 147]
+    },
     {
         id: 19, 
-	block: 'BIOLOGÍA CELULAR', 
-    	text: '¿A qué tipo de organización celular pertenecen las unidades estructurales y funcionales de los seres humanos?', 
-    	options: ['a) Célula procariota', 'b) Célula eucariota', 'c) Célula bacteriana', 'd) Célula arquea'], 
-    	answer: 'b' 
+        block: 'BIOLOGÍA CELULAR', 
+        text: '¿A qué tipo de organización celular pertenecen las unidades estructurales y funcionales de los seres humanos?', 
+        options: ['a) Célula procariota', 'b) Célula eucariota', 'c) Célula bacteriana', 'd) Célula arquea'], 
+        answer: 'b' 
     },
     { 
         id: 20, 
@@ -149,7 +152,7 @@ const questions = [
         text: '¿Qué tipo de tejido recubre las superficies internas y externas del cuerpo (piel y membranas mucosas)?', 
         options: ['a) Tejido conectivo', 'b) Tejido nervioso', 'c) Tejido miosina', 'd) Tejido epitelial'], 
         answer: 'd' 
-    } // [cite: 155, 156, 157, 158, 159, 160, 162]
+    }
 ];
 
 // Variables globales
@@ -161,7 +164,134 @@ let userAnswers = {};
 let flaggedQuestions = new Set();
 let isQuizSubmitted = false;
 let isQuizActive = false;
+let emailAlreadySent = false;
 
+// ==========================
+// UTILIDADES
+// ==========================
+function stripHtml(html) {
+    const div = document.createElement("div");
+    div.innerHTML = html || "";
+    return (div.textContent || div.innerText || "").trim();
+}
+
+function getOptionText(question, optionLetter) {
+    if (!optionLetter) return "Sin respuesta";
+    const index = optionLetter.charCodeAt(0) - 97; // a=0, b=1...
+    return question.options[index] || "Opción no encontrada";
+}
+
+function getResultsData() {
+    let correctAnswers = 0;
+
+    questions.forEach(q => {
+        if (userAnswers[q.id] === q.answer) {
+            correctAnswers++;
+        }
+    });
+
+    const baseScore = 425;
+    const variableScore = 575;
+    const pointsPerAnswer = variableScore / questions.length;
+    const finalScore = Math.round(baseScore + (correctAnswers * pointsPerAnswer));
+
+    return {
+        correctAnswers,
+        totalQuestions: questions.length,
+        percentage: ((correctAnswers / questions.length) * 100).toFixed(1),
+        finalScore
+    };
+}
+
+function buildEmailReport() {
+    const email = window.currentUser ? window.currentUser.email : "usuario_desconocido";
+    const results = getResultsData();
+
+    const lines = [];
+    lines.push("RESULTADOS DEL SIMULADOR DE ANATOMÍA");
+    lines.push("====================================");
+    lines.push(`Usuario: ${email}`);
+    lines.push(`Fecha: ${new Date().toLocaleString("es-EC")}`);
+    lines.push(`Aciertos: ${results.correctAnswers} / ${results.totalQuestions}`);
+    lines.push(`Porcentaje: ${results.percentage}%`);
+    lines.push(`Puntuación final: ${results.finalScore} / 1000`);
+    lines.push(" ");
+
+    questions.forEach(q => {
+        const selectedLetter = userAnswers[q.id] ? userAnswers[q.id].toUpperCase() : "Sin respuesta";
+        const selectedText = getOptionText(q, userAnswers[q.id]);
+        const correctLetter = q.answer.toUpperCase();
+        const correctText = getOptionText(q, q.answer);
+        const isCorrect = userAnswers[q.id] === q.answer ? "SÍ" : "NO";
+
+        lines.push(`Pregunta ${q.id} - ${q.block}`);
+        lines.push(`Enunciado: ${stripHtml(q.text)}`);
+        lines.push(`Marcó: ${selectedLetter} -> ${selectedText}`);
+        lines.push(`Correcta: ${correctLetter} -> ${correctText}`);
+        lines.push(`¿Acertó?: ${isCorrect}`);
+        lines.push("------------------------------------");
+    });
+
+    return {
+        subject: `Resultado Simulador Anatomía - ${email} - ${results.finalScore}/1000`,
+        message: lines.join("\n")
+    };
+}
+
+async function sendResultsByEmail() {
+    if (emailAlreadySent) return true;
+
+    const currentEmail = window.currentUser ? window.currentUser.email : "usuario_desconocido";
+    const report = buildEmailReport();
+
+    const payload = {
+        name: "Simulador de Anatomía",
+        email: currentEmail,
+        _replyto: currentEmail,
+        _subject: report.subject,
+        _captcha: "false",
+        _template: "table",
+        mensaje: report.message
+    };
+
+    try {
+        const response = await fetch(FORM_SUBMIT_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            console.error("FormSubmit respondió con error:", data);
+            return false;
+        }
+
+        emailAlreadySent = true;
+        console.log("Correo enviado correctamente con FormSubmit:", data);
+        return true;
+    } catch (error) {
+        console.error("Error enviando correo con FormSubmit:", error);
+        return false;
+    }
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    const timerEl = document.getElementById('timer');
+    if (timerEl) {
+        timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+}
+
+// ==========================
+// FLUJO DEL QUIZ
+// ==========================
 function startQuiz() {
     const email = window.currentUser ? window.currentUser.email : null;
     if (!email) {
@@ -169,14 +299,13 @@ function startQuiz() {
         return;
     }
 
-    // Verificar intentos
     const isAdmin = email === "sebastian.neto@593teveoenlau.ec";
     let attempts = localStorage.getItem(`attempts_${email}`) || 0;
     
     if (!isAdmin && attempts >= 2) {
-      alert("Ya alcanzaste el límite de 2 intentos. Se cerrará tu sesión.");
-      logoutAndReload();
-      return;
+        alert("Ya alcanzaste el límite de 2 intentos. Se cerrará tu sesión.");
+        logoutAndReload();
+        return;
     }
 
     if (typeof registerAttempt === 'function') {
@@ -192,9 +321,13 @@ function startQuiz() {
     userAnswers = {};
     flaggedQuestions.clear();
     isQuizSubmitted = false;
+    emailAlreadySent = false;
+
     document.getElementById('intro-page-container').style.display = 'none';
     document.getElementById('quiz-page').style.display = 'flex';
+
     renderQuiz();
+    updateTimerDisplay();
     startTimer();
     saveProgress();
 }
@@ -208,7 +341,6 @@ function renderQuiz() {
 }
 
 function renderNavigation() {
-    // Apunta al nuevo ID definido en index.html
     const navContainer = document.getElementById('anatomy-nav-buttons');
     if (!navContainer) {
         console.error("Error: No se encontró el div 'anatomy-nav-buttons'.");
@@ -216,15 +348,16 @@ function renderNavigation() {
     }
     navContainer.innerHTML = '';
 
-    // Limpieza preventiva
-    if (document.getElementById('biology-nav-buttons')) document.getElementById('biology-nav-buttons').innerHTML = '';
+    if (document.getElementById('biology-nav-buttons')) {
+        document.getElementById('biology-nav-buttons').innerHTML = '';
+    }
 
     questions.forEach((q, index) => {
         const button = document.createElement('button');
         button.textContent = q.id;
         button.onclick = () => {
             renderQuestion(index);
-            saveProgress(); 
+            saveProgress();
         };
         
         if (userAnswers[q.id]) button.classList.add('answered');
@@ -244,10 +377,8 @@ function renderQuestion(index) {
     const questionDiv = document.createElement('div');
     questionDiv.className = 'question active';
 
-    // Renderizado estándar de texto
     let html = `<h3>Pregunta ${q.id}.</h3><p>${q.text}</p>`;
 
-    // Imágenes opcionales (por si se agregan en el futuro)
     if (q.image) {
         const style = q.imageStyle || '';
         html += `<div class="image-container"><img src="${q.image}" alt="Imagen ${q.id}" style="${style}"></div>`;
@@ -260,10 +391,9 @@ function renderQuestion(index) {
         html += `<div class="image-container"><img src="${q.imageOptions}" alt="Opciones visuales" style="${style}"></div>`;
     }
 
-    // Opciones
     html += '<div class="options">';
     if (q.optionImages) {
-        const containerClass = 'image-options-container'; 
+        const containerClass = 'image-options-container';
         html += `<div class="${containerClass}">`;
         q.options.forEach((option, i) => {
             const optionValue = String.fromCharCode(97 + i);
@@ -279,7 +409,7 @@ function renderQuestion(index) {
         html += `</div>`;
     } else {
         q.options.forEach((option, i) => {
-            const optionValue = String.fromCharCode(97 + i); // Convierte 0->a, 1->b...
+            const optionValue = String.fromCharCode(97 + i);
             const checked = userAnswers[q.id] === optionValue ? 'checked' : '';
             html += `
                 <label>
@@ -305,19 +435,21 @@ function renderQuestion(index) {
 
 function handleOptionClick(questionId, element) {
     userAnswers[questionId] = element.value;
-    saveProgress(); 
+    saveProgress();
     renderNavigation();
 }
 
 function updateNavigationButtons() {
     document.getElementById('next-btn').style.display = currentQuestionIndex === questions.length - 1 ? 'none' : 'block';
     document.getElementById('prev-btn').style.display = currentQuestionIndex === 0 ? 'none' : 'block';
+
     const flagBtn = document.getElementById('flag-btn');
     if (flaggedQuestions.has(questions[currentQuestionIndex].id)) {
         flagBtn.style.backgroundColor = '#ffc107';
     } else {
         flagBtn.style.backgroundColor = '#6c757d';
     }
+
     renderNavigation();
 }
 
@@ -347,42 +479,45 @@ function prevQuestion() {
 }
 
 function startTimer() {
+    clearInterval(timerInterval);
+
     timerInterval = setInterval(() => {
         if (timeRemaining <= 0) {
             clearInterval(timerInterval);
             submitQuiz();
             return;
         }
+
         timeRemaining--;
-        const minutes = Math.floor(timeRemaining / 60);
-        const seconds = timeRemaining % 60;
-        document.getElementById('timer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        updateTimerDisplay();
+
         if (timeRemaining % 5 === 0) {
             saveProgress();
         }
     }, 1000);
 }
 
-function submitQuiz() {
-    if (isQuizSubmitted) return; 
+async function submitQuiz() {
+    if (isQuizSubmitted) return;
+
     clearInterval(timerInterval);
     isQuizSubmitted = true;
-    isQuizActive = false; 
-    localStorage.removeItem("quizState"); 
-    
+    isQuizActive = false;
+    localStorage.removeItem("quizState");
+
+    const sent = await sendResultsByEmail();
+
     document.getElementById('quiz-page').style.display = 'none';
     document.getElementById('results-page').style.display = 'flex';
     displayResultsPage();
+
+    if (!sent) {
+        alert("El examen se envió a resultados, pero el correo no pudo mandarse automáticamente. Revisa la activación de FormSubmit o vuelve a probar.");
+    }
 }
 
 function calculateResults() {
-    let correctAnswers = 0;
-    questions.forEach(q => {
-        if (userAnswers[q.id] === q.answer) {
-            correctAnswers++;
-        }
-    });
-    return { correctAnswers, totalQuestions: questions.length };
+    return getResultsData();
 }
 
 function displayResultsPage() {
@@ -390,21 +525,16 @@ function displayResultsPage() {
     if (existingAdjustedScore) {
         existingAdjustedScore.remove();
     }
+
     const results = calculateResults();
     const resultsScoreEl = document.querySelector('.results-score');
-    resultsScoreEl.textContent = `Aciertos: ${results.correctAnswers} / ${results.totalQuestions} (${(results.correctAnswers / results.totalQuestions * 100).toFixed(1)}%)`;
-    
-    // Puntuación ajustada (Base 425 + Variable 575)
-    const baseScore = 425;
-    const variableScore = 575;
-    const pointsPerAnswer = variableScore / results.totalQuestions;
-    const finalScore = Math.round(baseScore + (results.correctAnswers * pointsPerAnswer));
+    resultsScoreEl.textContent = `Aciertos: ${results.correctAnswers} / ${results.totalQuestions} (${results.percentage}%)`;
     
     const adjustedScoreEl = document.createElement('p');
     adjustedScoreEl.className = 'results-score adjusted-score-display';
     adjustedScoreEl.style.marginTop = '15px';
     adjustedScoreEl.style.fontSize = '2.8em';
-    adjustedScoreEl.innerHTML = `Puntuación Final: <strong style="color: var(--accent-color);">${finalScore} / 1000</strong>`;
+    adjustedScoreEl.innerHTML = `Puntuación Final: <strong style="color: var(--accent-color);">${results.finalScore} / 1000</strong>`;
     resultsScoreEl.parentNode.insertBefore(adjustedScoreEl, resultsScoreEl.nextSibling);
     
     const resultsContent = document.getElementById('results-content');
@@ -430,6 +560,7 @@ function displayResultsPage() {
                 const isSelected = userAnswer === optionValue;
                 const isTheCorrectAnswer = q.answer === optionValue;
                 let labelClass = 'image-option-label';
+
                 if (isSelected && isCorrect) labelClass += ' correct';
                 else if (isSelected && !isCorrect) labelClass += ' incorrect';
                 else if (isTheCorrectAnswer) labelClass += ' correct';
@@ -448,6 +579,7 @@ function displayResultsPage() {
                 const isSelected = userAnswer === optionValue;
                 const isTheCorrectAnswer = q.answer === optionValue;
                 let labelClass = '';
+
                 if (isSelected && isCorrect) labelClass = 'correct';
                 else if (isSelected && !isCorrect) labelClass = 'incorrect';
                 else if (isTheCorrectAnswer) labelClass = 'correct';
@@ -466,6 +598,7 @@ function displayResultsPage() {
         } else {
             html += `<p style="color: green; margin-top: 10px;">¡Respuesta correcta!</p>`;
         }
+
         block.innerHTML = html;
         resultsContent.appendChild(block);
     });
@@ -479,12 +612,14 @@ function displayResultsPage() {
 
 function saveProgress() {
     if (!isQuizActive || isQuizSubmitted) return;
+
     const state = {
         currentQuestionIndex,
         userAnswers,
         timeRemaining,
         flaggedQuestions: Array.from(flaggedQuestions)
     };
+
     localStorage.setItem("quizState", JSON.stringify(state));
 }
 
@@ -492,14 +627,21 @@ function restoreProgress() {
     const savedState = localStorage.getItem("quizState");
     if (savedState) {
         const saved = JSON.parse(savedState);
-        isQuizActive = true; 
+
+        isQuizActive = true;
+        isQuizSubmitted = false;
+        emailAlreadySent = false;
+
         document.getElementById('intro-page-container').style.display = 'none';
         document.getElementById('quiz-page').style.display = 'flex';
+
         currentQuestionIndex = saved.currentQuestionIndex || 0;
         userAnswers = saved.userAnswers || {};
         timeRemaining = saved.timeRemaining || totalTime;
         flaggedQuestions = new Set(saved.flaggedQuestions || []);
+
         renderQuiz();
+        updateTimerDisplay();
         startTimer();
     }
 }
@@ -507,7 +649,7 @@ function restoreProgress() {
 document.addEventListener('DOMContentLoaded', () => {
     auth.onAuthStateChanged(user => {
         if (user) {
-            window.currentUser = user; 
+            window.currentUser = user;
             document.getElementById('login-page').style.display = 'none';
             document.getElementById('app-container').style.display = 'block';
 
@@ -517,6 +659,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('intro-page-container').style.display = 'flex';
                 document.getElementById('quiz-page').style.display = 'none';
                 document.getElementById('results-page').style.display = 'none';
+                timeRemaining = totalTime;
+                updateTimerDisplay();
             }
         } else {
             window.currentUser = null;
@@ -529,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener("beforeunload", (e) => {
     if (isQuizActive && !isQuizSubmitted) {
         const confirmationMessage = '¡Atención! Si cierras o recargas la pestaña, tu intento se enviará automáticamente. ¿Estás seguro?';
-        e.returnValue = confirmationMessage; 
+        e.returnValue = confirmationMessage;
         return confirmationMessage;
     }
 });
@@ -539,4 +683,3 @@ window.addEventListener("pagehide", () => {
         saveProgress();
     }
 });
-
